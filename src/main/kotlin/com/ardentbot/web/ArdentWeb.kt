@@ -1,10 +1,19 @@
 package com.ardentbot.web
 
+import spark.ModelAndView
 import spark.Spark.*
+import spark.template.handlebars.HandlebarsTemplateEngine
+
+val secure = false
 
 fun main(args: Array<String>) {
-    secure(args[1], "ardent", null, null)
-    port(443)
+    val handlebars = HandlebarsTemplateEngine()
+
+    staticFileLocation("public")
+    if (secure) {
+        secure(args[1], "ardent", null, null)
+        port(443)
+    } else port(80)
     exception(Exception::class.java) { exception, request, response -> exception.printStackTrace() }
 
     get("/invite") { _, response ->
@@ -20,4 +29,8 @@ fun main(args: Array<String>) {
         response.redirect("https://www.patreon.com/ardent")
     }
 
+    get("/", { _, response ->
+        val map = hashMapOf<String, Any>()
+        ModelAndView(map, "index.hbs")
+    }, handlebars)
 }
